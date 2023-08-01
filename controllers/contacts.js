@@ -1,15 +1,21 @@
-import Book from "../models/contact.js";
+import Contact from "../models/contact.js";
 
 import { HttpError, ctrlWrapper } from "../helpers/index.js";
 
 const getAll = async (req, res, next) => {
-  const allContacts = await Book.find();
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const allContacts = await Contact.find({ owner, favorite }, "", {
+    skip,
+    limit,
+  }).populate("owner", "-password");
   res.json(allContacts);
 };
 
 const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await Book.findById(contactId);
+  const result = await Contact.findById(contactId);
   if (!result) {
     throw HttpError(404, "Not found");
   }
@@ -17,13 +23,15 @@ const getContactById = async (req, res, next) => {
 };
 
 const add = async (req, res, next) => {
-  const result = await Book.create(req.body);
+  const { _id: owner } = req.user;
+  console.log(owner);
+  const result = await Contact.create({ ...req.body, owner });
   res.status(201).json(result);
 };
 
 const deleteById = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await Book.findByIdAndDelete(contactId);
+  const result = await Contact.findByIdAndDelete(contactId);
   if (!result) {
     throw HttpError(404, "Not found");
   }
@@ -33,7 +41,7 @@ const deleteById = async (req, res, next) => {
 const updateById = async (req, res, next) => {
   const { contactId } = req.params;
 
-  const result = await Book.findByIdAndUpdate(contactId, req.body, {
+  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
   });
 
@@ -47,7 +55,7 @@ const updateById = async (req, res, next) => {
 const updateStatusContact = async (req, res, next) => {
   const { contactId } = req.params;
 
-  const result = await Book.findByIdAndUpdate(contactId, req.body, {
+  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
   });
 

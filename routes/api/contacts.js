@@ -2,9 +2,16 @@ import express from "express";
 import ctrl from "../../controllers/contacts.js";
 
 import schemas from "../../schemas/contacts.js";
-import { isEmpty, isValidId, validateBody } from "../../middlewares/index.js";
+import {
+  isEmpty,
+  isValidId,
+  validateBody,
+  authenticate,
+} from "../../middlewares/index.js";
 
 const router = express.Router();
+
+router.use(authenticate);
 
 router.get("/", ctrl.getAll);
 
