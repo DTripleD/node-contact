@@ -1,4 +1,5 @@
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 import { ctrlWrapper, HttpError } from "../helpers/index.js";
 
 import User from "../models/user.js";

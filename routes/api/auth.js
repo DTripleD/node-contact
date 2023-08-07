@@ -4,6 +4,7 @@ import {
   isValidId,
   validateBody,
   authenticate,
+  upload,
 } from "../../middlewares/index.js";
 import auth from "../../controllers/auth.js";
 
@@ -16,6 +17,13 @@ authRouter.post("/login", validateBody(users.userSigninSchema), auth.signin);
 authRouter.get("/current", authenticate, auth.getCurrent);
 
 authRouter.post("/logout", authenticate, auth.signout);
+
+authRouter.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  auth.updateAvatar
+);
 
 authRouter.patch(
   "/",
