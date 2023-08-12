@@ -1,18 +1,43 @@
-import auth from "./auth.js";
+import mongoose from "mongoose";
+import request from "supertest";
+import "dotenv/config";
+
+import User from "../models/user";
+
+import app from "../app";
+
+const { DB_HOST, PORT } = process.env;
 
 describe("test login function", () => {
-  test("Test", () => {
-    const result = auth.signin({
-      password: "13234",
-      email: "42dsfdsf1@ukr.net",
-    });
-    expect(result).toBe({
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZDBjZWRjMWRiOGFhNTA5ODIwODExOCIsImlhdCI6MTY5MTQwOTMyNSwiZXhwIjoxNjkxNDkyMTI1fQ.nAF-QfDJToqjLXeorSAxg7uB1Kg5YrWYyU32L6uur-4",
-      user: {
-        email: "42dsfdsf1@ukr.net",
-        subscription: "starter",
-      },
-    });
+  let server = null;
+
+  beforeAll(async () => {
+    await mongoose.connect(DB_HOST);
+    server = app.listen(PORT);
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+    server.close();
+  });
+
+  test("test login with correct data", async () => {
+    const loginData = {
+      email: "namoher431@v1zw.com",
+      password: "1111111",
+    };
+    const { statusCode, body } = await request(app)
+      .post("/users/login")
+      .send(loginData);
+
+    expect(statusCode).toBe(200);
+    expect(body.token).toBeTruthy();
+    expect(body.user).toHaveProperty("email", loginData.email);
+    expect(body.user).toHaveProperty("subscription");
+    expect(typeof body.user.email).toBe("string");
+    expect(typeof body.user.subscription).toBe("string");
+
+    const user = await User.findOne({ email: loginData.email });
+    expect(user.name).toBe(loginData.name);
   });
 });
